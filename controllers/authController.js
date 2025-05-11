@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
-const sendEmail = require('../utils/email')
+const Email = require('../utils/email')
 const crypto = require('crypto')
 
 const signToken = id => {
@@ -42,6 +42,8 @@ exports.signup = catchAsync(async (req, res, next) => {
         passwordChangedAt: req.body.passwordChangedAt,
         role: req.body.role,
     })
+    const url = `${req.protocol}://${req.get('host')}/me`;
+    await new Email(newUser, url).sendWelcome()
 
     createSendToken(newUser, 201, res)
 })
@@ -125,7 +127,6 @@ exports.restrictTo = (...roles) => {
         if (!roles.includes(req.user.role)) {
             return next(new AppError('You do not have a premission to perform this action', 403))
         }
-
         next()
     }
 }
@@ -141,16 +142,9 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     const resetToken = user.createPasswordResetToken()
     await user.save({ validateBeforeSave: false })
     // 3 send it to user's email
-
-    const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`
-    const message = `forgot tour password ? submit a patch request with your new password and passwordConfirm to: ${resetURL}.\nif you did not forget your password please ignore this email !`
-
     try {
-        await sendEmail({
-            email: user.email,
-            subject: 'your password reset token (valid for 10 minutes)',
-            message,
-        })
+        const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`
+        await new Email(user, resetURL).sendPasswordReset()
 
         res.status(200).json({
             status: 'success',

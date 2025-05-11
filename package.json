@@ -23,6 +23,7 @@
     "express-rate-limit": "^7.5.0",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
+    "html-to-text": "^9.0.5",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.16.0",
     "mongoose": "^5.13.23",
@@ -32,6 +33,7 @@
     "pug": "^3.0.3",
     "sharp": "^0.34.1",
     "slugify": "^1.6.6",
+    "stripe": "^7.63.1",
     "validator": "^13.15.0",
     "xss-clean": "^0.1.4"
   },
